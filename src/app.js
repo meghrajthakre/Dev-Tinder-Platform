@@ -7,6 +7,10 @@ app.use('/home', (req,res)=>{
     res.send('Hello World! from home route');
 
 })
+app.use('/about', (req,res)=>{
+    res.send('Hello World! from home route');
+
+})
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
