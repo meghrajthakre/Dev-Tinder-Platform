@@ -1,15 +1,22 @@
 const express = require('express');
-require('./config/database');
+const connectDB = require('./config/database');
 
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 
+connectDB()
+  .then(() => {
+    console.log('Database connected successfully');
+    app.listen(port, () => {
+      console.log(`Server is running on http://localhost:${port}`);
+    })
+  })
+  .catch((err) => {
+    console.error('Database connection error:', err);
+  });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-})
 
 // meghrajthakre444_db_user
 // MeghrajThakre@1234
