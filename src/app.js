@@ -69,25 +69,48 @@ app.delete('/user/:id', async (req, res) => {
   }
 })
 
+// Update user by ID
 app.patch('/update/:id', async (req, res) => {
-  const userId = req.params.id;
+  const userId = req.params.id;       // Get user ID from URL params
+  const data = req.body;              // Get update data from request body
 
   try {
-    // Validate MongoDB ObjectId
+    // Allowed fields that can be updated
+    const ALLOWED_UPDATES = ['firstName', 'lastName', 'password', 'gender', 'age', 'photourl', 'skills'];
+
+    // Check if every incoming update field is allowed
+    const requestUpdates = Object.keys(data).every((update) =>
+      ALLOWED_UPDATES.includes(update)
+    );
+
+    // If user tries to update a field not allowed → throw error
+    if (!requestUpdates) {
+      throw new Error(' updates! not allowed ');
+    }
+
+    // Validate skills array length (max 50 items)
+    if (data.skills && data.skills.length > 50) {
+      throw new Error(' skills exceeded the limit of 50 ');
+    }
+
+    // Validate MongoDB ObjectId (must be 24 characters)
     if (userId.length !== 24) {
       return res.status(400).json({ message: "Invalid User ID" });
     }
 
+    // Update user in DB with validation enabled
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      req.body,
-      { new: true, runValidators: true }
+      data,
+      { new: true, runValidators: true } // new: return updated doc, runValidators: apply schema validation
     );
 
+    // If user ID not found in DB
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Success response
     res.status(200).json({
       success: true,
       message: "User updated successfully",
@@ -95,6 +118,7 @@ app.patch('/update/:id', async (req, res) => {
     });
 
   } catch (error) {
+    // Error handling
     console.error("User Not Updated:", error.message);
     res.status(500).json({
       success: false,

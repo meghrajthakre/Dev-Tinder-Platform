@@ -31,7 +31,7 @@ const userSchema = new Schema({
     },
     gender: {
         type: String,
-        enum: ['male', 'female', 'other'],
+        enum: ['Male', 'Female', 'Other', 'male', 'female', 'other'],
         message: 'Gender must be Male, Female, or Other'
     },
     age: {
@@ -48,5 +48,5 @@ const userSchema = new Schema({
         default: []
     }
 
-},{timestamps: true});
+}, { timestamps: true });
 module.exports = mongoose.model('User', userSchema);
