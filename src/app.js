@@ -8,6 +8,7 @@ const validate = require('./utils/validation');
 const cookieParser = require('cookie-parser');
 const jsonewebtoken = require('jsonwebtoken');
 const userAuth = require('./middlewares/auth');
+
 app.use(express.json());
 app.use(cookieParser());
 app.get('/', (req, res) => {
@@ -15,20 +16,26 @@ app.get('/', (req, res) => {
 });
 
 app.post('/signup', async (req, res) => {
-  validate(req)
-  try {
-    //extract from req.body
-    const { firstName, lastName, email, password } = req.body;
 
+  // Validate incoming request data using your custom validate() function
+  validate(req)
+
+  try {
+    // Extract fields from req.body (sent by the client while signing up)
+    const { firstName, lastName, email, password } = req.body;
+    // Hash the plain password using bcrypt (10 rounds of salting)
     const passwordHash = await bcrypt.hash(password, 10);
+    // Create a new user object with hashed password
     const user = new User({
       firstName,
       lastName,
       email,
       password: passwordHash
     });
+    // Save the user document into MongoDB
     await user.save();
     res.status(201).send("SignUp successful");
+
   } catch (err) {
     console.error("Error saving user:", err.message);
     return res.status(400).json({
@@ -37,6 +44,7 @@ app.post('/signup', async (req, res) => {
     });
   }
 })
+
 
 app.post('/login', async (req, res) => {
   // Extract email and password from request body
@@ -50,17 +58,13 @@ app.post('/login', async (req, res) => {
     }
 
     // Compare entered password with hashed password in DB
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.isPassValid(password);
 
     // If password is valid → generate JWT
     if (isPasswordValid) {
 
       // Create JWT token with expiry (correct syntax)
-      const jwt = await jsonewebtoken.sign(
-        { id: user._id },           // data to encode
-        "meghrajsecret",            // secret key
-        { expiresIn: "1d" }         // token expiry → 1 day
-      );
+      const jwt = await user.getJWT();
 
       // Send token as cookie to client
       // Cookie expires in 8 hours
@@ -93,8 +97,6 @@ app.post('/login', async (req, res) => {
 
 
 app.get('/profile', userAuth, async (req, res) => {
-
-
   try {
     const user = req.user;
     if (!user) {
@@ -105,6 +107,12 @@ app.get('/profile', userAuth, async (req, res) => {
   } catch (error) {
     res.status(500).send(`ERROR fetching profile: ${error.message}`);
   }
+})
+
+app.post('/sendConnectRequest', userAuth, async (req, res) => {
+  const user = req.user;
+
+  res.send(user.firstName + " " + user.lastName + " Connection Request Sent Successfully");
 })
 
 

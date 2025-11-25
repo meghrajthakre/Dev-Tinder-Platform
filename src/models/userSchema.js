@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const validate = require('validator');
 const { Schema } = mongoose;
-
+const jsonewebtoken = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const userSchema = new Schema({
     firstName: {
         type: String,
@@ -65,4 +66,36 @@ const userSchema = new Schema({
     }
 
 }, { timestamps: true });
+
+
+userSchema.methods.getJWT = async function () {
+
+    // "this" refers to the current user document instance
+    const user = this;
+
+    // Generate a JWT token for the user
+    const jwt = await jsonewebtoken.sign(
+        { id: user._id },     // Payload: store user's unique ID
+        "meghrajsecret",      // Secret key used to sign the token
+        { expiresIn: "1d" }   // Token expiry time: valid for 1 day
+    );
+
+    // Return the generated JWT
+    return jwt;
+}
+
+
+userSchema.methods.isPassValid = async function (inputPassword) {
+
+    // "this" refers to the current user document
+    const user = this;
+    // Get the hashed password stored in the database
+    const hashPassword = user.password;
+    // Compare the incoming plain password with the hashed password
+    const passValid = await bcrypt.compare(inputPassword, hashPassword);
+    // Return true (valid) or false (invalid)
+    return passValid;
+}
+
+
 module.exports = mongoose.model('User', userSchema);
