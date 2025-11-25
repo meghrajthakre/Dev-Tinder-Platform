@@ -1,8 +1,10 @@
 const express = require('express');
 const connectDB = require('./config/database');
 const User = require('./models/userSchema');
+const bcrypt = require('bcrypt');
 const app = express();
 const port = process.env.PORT || 3000;
+const validate = require('./utils/validation');
 
 app.use(express.json());
 
@@ -12,8 +14,18 @@ app.get('/', (req, res) => {
 
 
 app.post('/signup', async (req, res) => {
-  const user = new User(req.body);
+  validate(req)
   try {
+    //extract from req.body
+    const { firstName, lastName, email, password } = req.body;
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: passwordHash
+    });
     await user.save();
     res.status(201).send("SignUp successful");
   } catch (err) {
