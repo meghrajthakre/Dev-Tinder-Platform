@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validate = require('validator');
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
@@ -20,13 +21,23 @@ const userSchema = new Schema({
         required: true,
         unique: true,
         lowercase: true,
-        trim: true
+        trim: true,
+        validate(value) {
+            if (!validate.isEmail(value)) {
+                throw new Error("Invalid Email Address");
+            }
+        }
     },
     password: {
         type: String,
         required: true,
         minlength: 4,
         maxlength: 100,
+        validate(value) {
+            if (!validate.isStrongPassword(value)) {
+                throw new Error("Enter a strong password");
+            }
+        }
 
     },
     gender: {
@@ -41,7 +52,12 @@ const userSchema = new Schema({
     },
     photourl: {
         type: String,
-        default: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fsearch%3Fk%3Ddummy&psig=AOvVaw2TYyHn6TsJwJf16E2fAQ34&ust=1764062698214000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCODV_uW7ipEDFQAAAAAdAAAAABAE'
+        default: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fsearch%3Fk%3Ddummy&psig=AOvVaw2TYyHn6TsJwJf16E2fAQ34&ust=1764062698214000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCODV_uW7ipEDFQAAAAAdAAAAABAE',
+        validate(value) {
+            if (!validate.isURL(value)) {
+                throw new Error("Invalid URL for photo");
+            }
+        }
     },
     skills: {
         type: [String],

@@ -18,14 +18,10 @@ app.post('/signup', async (req, res) => {
     res.status(201).send("SignUp successful");
   } catch (err) {
     console.error("Error saving user:", err.message);
-
-    if (err.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already exists"
-      });
-    }
-
+    return res.status(400).json({
+      success: false,
+      message: err.message
+    });
   }
 })
 
