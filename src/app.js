@@ -5,13 +5,14 @@ const bcrypt = require('bcrypt');
 const app = express();
 const port = process.env.PORT || 3000;
 const validate = require('./utils/validation');
-
+const cookieParser = require('cookie-parser');
+const jsonewebtoken = require('jsonwebtoken');
+const userAuth = require('./middlewares/auth');
 app.use(express.json());
-
+app.use(cookieParser());
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
-
 
 app.post('/signup', async (req, res) => {
   validate(req)
@@ -37,6 +38,76 @@ app.post('/signup', async (req, res) => {
   }
 })
 
+app.post('/login', async (req, res) => {
+  // Extract email and password from request body
+  const { email, password } = req.body;
+
+  try {
+    // Check if user exists with given email
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("Invalid login credentials");
+    }
+
+    // Compare entered password with hashed password in DB
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    // If password is valid → generate JWT
+    if (isPasswordValid) {
+
+      // Create JWT token with expiry (correct syntax)
+      const jwt = await jsonewebtoken.sign(
+        { id: user._id },           // data to encode
+        "meghrajsecret",            // secret key
+        { expiresIn: "1d" }         // token expiry → 1 day
+      );
+
+      // Send token as cookie to client
+      // Cookie expires in 8 hours
+      res.cookie("token", jwt, {
+        expires: new Date(Date.now() + 8 * 3600000),  // 8 hours
+      });
+
+      // Send success response
+      return res.status(200).json({
+        message: "Login successful!!!"
+      });
+    }
+    // If password does not match
+    else {
+      throw new Error("Invalid login credentials");
+    }
+
+  } catch (err) {
+
+    // Log the error internally
+    console.error("Error logging in user:", err.message);
+
+    // Return proper error response
+    return res.status(500).json({
+      success: false,
+      message: "Server error: " + err.message
+    });
+  }
+});
+
+
+app.get('/profile', userAuth, async (req, res) => {
+
+
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    res.status(200).send(user);
+  } catch (error) {
+    res.status(500).send(`ERROR fetching profile: ${error.message}`);
+  }
+})
+
+
 app.get('/user', async (req, res) => {
   try {
     const user = await User.find({ email: req.body.email });
@@ -61,7 +132,6 @@ app.get('/feed', async (req, res) => {
     res.status(500).send("Error fetching users:", err.message);
   }
 });
-
 
 app.delete('/user/:id', async (req, res) => {
   const userId = req.params.id;
