@@ -3,6 +3,8 @@ const profileRouter = express.Router();
 const userAuth = require('../middlewares/auth');
 const User = require('../models/userSchema');
 const { validUserUpdates } = require('../utils/validation');
+const isPassValid = require('../models/userSchema');
+const bcrypt = require('bcrypt');
 
 profileRouter.get('/profile', userAuth, async (req, res) => {
   try {
@@ -59,5 +61,36 @@ profileRouter.patch('/profile/edit', userAuth, async (req, res) => {
   }
 });
 
+profileRouter.patch("/profile/forgotPassword", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    const { password, newPassword } = req.body;
+
+    if (!password || !newPassword) {
+      throw new Error("Both current and new passwords are required");
+    }
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    const isPassValid = await user.isPassValid(password);
+    
+    if (!isPassValid) {
+      throw new Error("Invalid current password");
+    }
+
+    user.password =passwordHash;
+    await user.save();
+
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully"
+    });
+
+
+  } catch (error) {
+    res.status(500).send(`Error updating password: ${error.message}`);
+  }
+
+
+})
 
 module.exports = profileRouter;
