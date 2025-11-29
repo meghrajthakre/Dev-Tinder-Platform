@@ -6,47 +6,45 @@ const User = require('../models/userSchema.js');
 
 // sending connection request
 requestRouter.post('/request/send/:status/:toUserId', userAuth, async (req, res) => {
-
     try {
-        const fromUserId = req.user.id;
+        const fromUserId = req.user._id;         // always use _id from Mongo
         const toUserId = req.params.toUserId;
         const status = req.params.status;
 
-        // status type only allowed
-       const allowedStatus = ['ignored', 'interested'];
-  // WRONG SPELLING
+        // Allowed status
+        const allowedStatus = ['ignored', 'interested'];
 
         if (!allowedStatus.includes(status)) {
             return res.status(400).json({
                 success: false,
-                message: `Invalid status type. Allowed types are: ${allowedStatus.join(', ')}`
+                message: `Invalid status type. Allowed types: ${allowedStatus.join(', ')}`
             });
         }
-        // checking existing request
-        const existingRequest = await ConnectionRequest.findOne({
-            $or: [
-                { fromUserId: fromUserId },
-                { toUserId: toUserId }
-            ]
-        });
 
-         // checking the fromUserId and toUserId are not same
-        if(fromUserId === toUserId){
-            return  res.status(400).json({
+        // Prevent sending request to yourself
+        if (fromUserId.toString() === toUserId.toString()) {
+            return res.status(400).json({
                 success: false,
-                message: `fromUserId and toUserId cannot be the same`
+                message: `You cannot send a request to yourself`
             });
         }
 
-
-        // if sending id user is not in the database
+        // Check if target user exists
         const userExists = await User.findById(toUserId);
         if (!userExists) {
             return res.status(404).json({
                 success: false,
-                message: `The user you are trying to send a request to does not exist.`
+                message: `The user you are trying to send a request to does not exist`
             });
         }
+
+        // ❗ FIXED: Check if request exists between these 2 users
+        const existingRequest = await ConnectionRequest.findOne({
+            $or: [
+                { fromUserId, toUserId },
+                { fromUserId: toUserId, toUserId: fromUserId }
+            ]
+        });
 
         if (existingRequest) {
             return res.status(400).json({
@@ -55,26 +53,29 @@ requestRouter.post('/request/send/:status/:toUserId', userAuth, async (req, res)
             });
         }
 
-       
-        const newRequsest = new ConnectionRequest({
+        // Create new request
+        const newRequest = new ConnectionRequest({
             fromUserId,
             toUserId,
             status
         });
 
-        await newRequsest.save();
+        await newRequest.save();
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
-            message: `${req.user.firstName} is Sent  ${status}  request to ${userExists.firstName} - successfully`,
-            request: newRequsest
+            message: `${req.user.firstName} sent an '${status}' request to ${userExists.firstName} successfully.`,
+            request: newRequest
         });
 
     } catch (error) {
-        res.status(500).send(`ERROR sending request: ${error.message}`);
+        return res.status(500).json({
+            success: false,
+            message: `Error sending request: ${error.message}`
+        });
     }
+});
 
-})
 
 // // accepting connection request ot rejecting
 // Review a connection request (Accept or Reject)
