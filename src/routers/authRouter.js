@@ -61,7 +61,8 @@ authRouter.post('/login', async (req, res) => {
 
       // Send success response
       return res.status(200).json({
-        message: "Login successful!!!"
+        message: "Login successful!!!",
+        data: user
       });
     }
     // If password does not match
