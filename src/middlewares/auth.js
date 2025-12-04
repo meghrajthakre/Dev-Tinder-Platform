@@ -6,7 +6,7 @@ const userAuth = async (req, res, next) => {
     try {
         const { token } = req.cookies;
         if (!token) {
-            throw new Error("token is not valid!!!!!!!!!");;
+           res.status(401).send('Please Login!!!')
         }
         const decodeMessage = await jsonewebtoken.verify(token, "meghrajsecret");
         const userId = decodeMessage.id;

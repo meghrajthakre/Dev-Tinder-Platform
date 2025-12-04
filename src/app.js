@@ -36,5 +36,3 @@ connectDB()
   });
 
 
-// meghrajthakre444_db_user
-// MeghrajThakre@1234

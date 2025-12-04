@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const User = require('../models/userSchema');
-const {validate} = require('../utils/validation');
+const { validate } = require('../utils/validation');
 const authRouter = express.Router();
 
 authRouter.post('/signup', async (req, res) => {
@@ -60,10 +60,7 @@ authRouter.post('/login', async (req, res) => {
       });
 
       // Send success response
-      return res.status(200).json({
-        message: "Login successful!!!",
-        data: user
-      });
+      return res.status(200).json(user);
     }
     // If password does not match
     else {
