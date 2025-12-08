@@ -19,7 +19,7 @@ profileRouter.get('/profile', userAuth, async (req, res) => {
   }
 })
 
-profileRouter.get('/feed', async (req, res) => {
+profileRouter.get('/feed',userAuth, async (req, res) => {
   const users = await User.find({});
   try {
     res.status(200).json(users);

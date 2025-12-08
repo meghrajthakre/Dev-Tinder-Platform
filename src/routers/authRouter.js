@@ -9,7 +9,7 @@ authRouter.post('/signup', async (req, res) => {
   validate(req)
   try {
     // Extract fields from req.body (sent by the client while signing up)
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, about, age, photourl, gender ,skills} = req.body;
     // Hash the plain password using bcrypt (10 rounds of salting)
     const passwordHash = await bcrypt.hash(password, 10);
     // Create a new user object with hashed password
@@ -17,7 +17,12 @@ authRouter.post('/signup', async (req, res) => {
       firstName,
       lastName,
       email,
-      password: passwordHash
+      password: passwordHash,
+      about,
+      age,
+      gender,
+      skills,
+      photourl
     });
     // Save the user document into MongoDB
     await user.save();
@@ -41,7 +46,7 @@ authRouter.post('/login', async (req, res) => {
     // Check if user exists with given email
     const user = await User.findOne({ email });
     if (!user) {
-      throw new Error("Invalid login credentials");
+      return res.status(400).res('Invalid login credentials')
     }
 
     // Compare entered password with hashed password in DB
@@ -73,7 +78,7 @@ authRouter.post('/login', async (req, res) => {
     console.error("Error logging in user:", err.message);
 
     // Return proper error response
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
       message: "Server error: " + err.message
     });
