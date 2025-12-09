@@ -41,6 +41,13 @@ const userSchema = new Schema({
         }
 
     },
+    // mobile: {
+    //     type: Number,
+
+    // },
+    // profession: {
+    //     tyep: String
+    // },
     about: {
         type: String
     },

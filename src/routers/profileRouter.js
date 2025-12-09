@@ -19,7 +19,7 @@ profileRouter.get('/profile', userAuth, async (req, res) => {
   }
 })
 
-profileRouter.get('/feed',userAuth, async (req, res) => {
+profileRouter.get('/feed', userAuth, async (req, res) => {
   const users = await User.find({});
   try {
     res.status(200).json(users);
@@ -30,36 +30,34 @@ profileRouter.get('/feed',userAuth, async (req, res) => {
 });
 
 // Update user by ID
-profileRouter.patch('/profile/edit', userAuth, async (req, res) => {
-
+profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
     if (!validUserUpdates(req)) {
-      throw new Error("Invalid updates!")
+      return res.status(400).json({ success: false, message: "Invalid fields" });
     }
-    const loggendInUser = req.user;
 
-    Object.keys(req.body).every((update) => (loggendInUser[update] = req.body[update]));
+    const user = req.user;
+    Object.keys(req.body).forEach(
+      (key) => (user[key] = req.body[key])
+    );
 
-    await loggendInUser.save();
+    await user.save();
 
-
-    // Success response
     res.status(200).json({
       success: true,
-      message: `${loggendInUser.firstName} your profile has been updated successfully`,
-      user: loggendInUser
+      message: "Profile updated successfully",
+      user,
     });
 
-  } catch (error) {
-    // Error handling
-    console.error("User Not Updated:", error.message);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({
       success: false,
-      message: "User Not Updated",
-      error: error.message
+      message: err.message,
     });
   }
 });
+
 
 profileRouter.patch("/profile/forgotPassword", userAuth, async (req, res) => {
   try {
@@ -71,12 +69,12 @@ profileRouter.patch("/profile/forgotPassword", userAuth, async (req, res) => {
     }
     const passwordHash = await bcrypt.hash(newPassword, 10);
     const isPassValid = await user.isPassValid(password);
-    
+
     if (!isPassValid) {
       throw new Error("Invalid current password");
     }
 
-    user.password =passwordHash;
+    user.password = passwordHash;
     await user.save();
 
 

@@ -18,7 +18,7 @@ const validUserUpdates = (req) => {
         "lastName",
         "age",
         "gender",
-        "bio",
+        "about",
         "skills",
         "photourl",
         "photos",
