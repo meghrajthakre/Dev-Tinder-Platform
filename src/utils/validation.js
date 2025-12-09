@@ -12,12 +12,23 @@ const validate = (req) => {
 
 }
 
-const validUserUpdates = (req)=>{
-    const ALLOWED_UPDATES = ['firstName', 'lastName', 'age','about','skills','photourl','gender'];
+const validUserUpdates = (req) => {
+    const allowedUpdates = [
+        "firstName",
+        "lastName",
+        "age",
+        "gender",
+        "bio",
+        "skills",
+        "photourl",
+        "photos",
+        "mobile",
+        "profession"
+    ];
 
-    const isUpdateValid = Object.keys(req.body).every(field => ALLOWED_UPDATES.includes(field));
+    const isUpdateValid = Object.keys(req.body).every(field => allowedUpdates.includes(field));
 
     return isUpdateValid;
 }
 
-module.exports = {validate , validUserUpdates};
+module.exports = { validate, validUserUpdates };
