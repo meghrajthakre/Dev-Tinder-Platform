@@ -46,7 +46,7 @@ authRouter.post('/login', async (req, res) => {
     // Check if user exists with given email
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).res('Invalid login credentials')
+      return res.status(401).res('Invalid login credentials')
     }
 
     // Compare entered password with hashed password in DB
@@ -69,7 +69,7 @@ authRouter.post('/login', async (req, res) => {
     }
     // If password does not match
     else {
-      throw new Error("Invalid login credentials");
+      return res.status(401).res('Invalid login credentials')
     }
 
   } catch (err) {
@@ -78,7 +78,7 @@ authRouter.post('/login', async (req, res) => {
     console.error("Error logging in user:", err.message);
 
     // Return proper error response
-    return res.status(400).json({
+    return res.status(401).json({
       success: false,
       message: "Server error: " + err.message
     });
