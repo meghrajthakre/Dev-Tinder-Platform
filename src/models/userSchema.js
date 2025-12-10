@@ -46,7 +46,7 @@ const userSchema = new Schema({
 
     },
     profession: {
-        tyep: String
+        type: String
     },
     about: {
         type: String

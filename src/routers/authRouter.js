@@ -75,12 +75,12 @@ authRouter.post('/login', async (req, res) => {
   } catch (err) {
 
     // Log the error internally
-    console.error("Error logging in user:", err.message);
+    console.error("Invalid login credentials:", err.message);
 
     // Return proper error response
     return res.status(401).json({
       success: false,
-      message: "Server error: " + err.message
+      message: "Invalid login credentials: " + err.message
     });
   }
 });

@@ -5,40 +5,39 @@ const ConnectionRequest = require('../models/connectionRequest')
 const User = require('../models/userSchema')
 
 // Get all connection requests received by the logged-in user
-userRouter.get('/user/request/received', userAuth, async (req, res) => {
+userRouter.get("/user/request/received", userAuth, async (req, res) => {
     try {
-        const loggedInUser = req.user;
+        const loggedInUserId = req.user._id;
 
-        // Fetch all connection requests where logged-in user is the receiver
         const requests = await ConnectionRequest.find({
-            toUserId: loggedInUser._id,
-            status: "interested"
-        }).populate("fromUserId", "firstName lastName photourl email");
+            toUserId: loggedInUserId,
+            status: "interested",
+        })
+            .populate(
+                "fromUserId",
+                "_id firstName lastName photourl about"
+            )
+            .sort({ createdAt: -1 });
 
-        // If no requests found
-        if (requests.length === 0) {
-            return res.status(200).json({
-                success: false,
-                message: `${loggedInUser.firstName}, you have no pending connection requests.`,
-                requests: []
-            });
-        }
-
-        // Success response
         res.status(200).json({
             success: true,
-            message: `Here are all your pending connection requests, ${loggedInUser.firstName}.`,
-            total: requests.length,
-            requests
+            count: requests.length,
+            requests: requests.map((req) => ({
+                _id: req._id,
+                status: req.status,
+                about: req.about,
+                createdAt: req.createdAt,
+                fromUser: req.fromUserId,
+            })),
         });
-
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: `Error fetching requests: ${error.message}`
+            message: "Failed to fetch connection requests",
         });
     }
 });
+
 
 
 // Route to get all accepted connections of the logged-in user
@@ -62,8 +61,8 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
             ]
         })
             // Populate user data (only selected fields)
-            .populate("fromUserId", "firstName lastName photourl email")
-            .populate("toUserId", "firstName lastName photourl email");
+            .populate("fromUserId", "firstName lastName photourl email age gender ")
+            .populate("toUserId", "firstName lastName photourl email age gender ");
 
         // Map each request and return the *other* user connected to the logged-in user
         const data = connectionReq.map((row) => {
