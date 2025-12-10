@@ -41,13 +41,13 @@ const userSchema = new Schema({
         }
 
     },
-    // mobile: {
-    //     type: Number,
+    mobile: {
+        type: Number,
 
-    // },
-    // profession: {
-    //     tyep: String
-    // },
+    },
+    profession: {
+        tyep: String
+    },
     about: {
         type: String
     },
