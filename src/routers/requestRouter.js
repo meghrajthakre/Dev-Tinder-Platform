@@ -38,7 +38,7 @@ requestRouter.post('/request/send/:status/:toUserId', userAuth, async (req, res)
             });
         }
 
-        // ❗ FIXED: Check if request exists between these 2 users
+        // Check for existing request both directions
         const existingRequest = await ConnectionRequest.findOne({
             $or: [
                 { fromUserId, toUserId },

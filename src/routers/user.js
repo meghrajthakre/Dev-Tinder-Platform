@@ -104,16 +104,12 @@ userRouter.get('/user/feed', userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
 
-        // 📌 Pagination values (page = 1, limit = 10 default)
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-        limit = limit > 50 ? 50 : limit
+        let limit = parseInt(req.query.limit) || 10;
+        limit = limit > 50 ? 50 : limit;
 
-        // 1️⃣ Get all connection requests involving logged-in user
-        // This covers:
-        //  - User sent request to someone
-        //  - Someone sent request to user
+        const skip = (page - 1) * limit;
+
         const connectionsReq = await ConnectionRequest.find({
             $or: [
                 { fromUserId: loggedInUser._id },
@@ -121,25 +117,15 @@ userRouter.get('/user/feed', userAuth, async (req, res) => {
             ]
         }).select("fromUserId toUserId");
 
-        // 2️⃣ Set to hold all userIds that must NOT appear in feed
         const hideUserFromFeed = new Set();
 
-        // 3️⃣ Add both fromUserId & toUserId of each request
-        // This prevents showing users who have:
-        //  - Pending requests
-        //  - Accepted requests
-        connectionsReq.forEach((req) => {
+        connectionsReq.forEach(req => {
             hideUserFromFeed.add(req.fromUserId.toString());
             hideUserFromFeed.add(req.toUserId.toString());
         });
 
-        // 4️⃣ Also hide the logged-in user himself
         hideUserFromFeed.add(loggedInUser._id.toString());
 
-        // 5️⃣ Fetch users who:
-        //  - Are not connected
-        //  - Have no pending request with logged-in user
-        //  - Are not the logged-in user
         const users = await User.find({
             _id: { $nin: Array.from(hideUserFromFeed) },
         })
@@ -147,17 +133,15 @@ userRouter.get('/user/feed', userAuth, async (req, res) => {
             .skip(skip)
             .limit(limit);
 
-        // 6️⃣ Response to client
         res.status(200).json({
             success: true,
             message: "Feed fetched successfully",
             currentPage: page,
-            limit: limit,
+            limit,
             data: users
         });
 
     } catch (error) {
-        // 7️⃣ Centralized error handler
         res.status(500).json({
             success: false,
             message: `Error fetching feed: ${error.message}`

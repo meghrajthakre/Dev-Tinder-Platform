@@ -5,14 +5,19 @@ const { validate } = require('../utils/validation');
 const authRouter = express.Router();
 
 authRouter.post('/signup', async (req, res) => {
-  // Validate incoming request data using your custom validate() function
-  validate(req)
   try {
-    // Extract fields from req.body (sent by the client while signing up)
-    const { firstName, lastName, email, password, about, age, photourl, gender ,skills} = req.body;
-    // Hash the plain password using bcrypt (10 rounds of salting)
+    validate(req);
+
+    const { firstName, lastName, email, password, about, age, photourl, gender, skills } = req.body;
     const passwordHash = await bcrypt.hash(password, 10);
-    // Create a new user object with hashed password
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists. Please log in or use another email."
+      });
+    }
     const user = new User({
       firstName,
       lastName,
@@ -24,19 +29,33 @@ authRouter.post('/signup', async (req, res) => {
       skills,
       photourl
     });
-    // Save the user document into MongoDB
-    await user.save();
-    res.status(201).send("SignUp successful");
+
+    const userSave = await user.save();
+    const jwt = await userSave.getJWT();
+
+    // Cookie
+    res.cookie("token", jwt, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 8 * 60 * 60 * 1000
+    });
+
+    // Response
+    res.status(201).json({
+      success: true,
+      message: "SignUp successful",
+      user: userSave
+    });
 
   } catch (err) {
     console.error("Error saving user:", err.message);
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: err.message
     });
   }
-})
-
+});
 
 authRouter.post('/login', async (req, res) => {
   // Extract email and password from request body
@@ -87,9 +106,12 @@ authRouter.post('/login', async (req, res) => {
 
 
 authRouter.post('/logout', (req, res) => {
-  res.cookie('token', null, {
-    expiresIn: new Date(Date.now()),
-  })
+  res.cookie("token", "", {
+    expires: new Date(Date.now()),   // ❗ correct option
+    httpOnly: true,
+    secure: true,
+    sameSite: "none"
+  });
   res.status(200).json({ message: "Logout Successful" });
 })
 module.exports = authRouter;
