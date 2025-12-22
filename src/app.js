@@ -7,10 +7,12 @@ const cookieParser = require('cookie-parser');
 const connectDB = require('./config/database');
 const authRouter = require('./routers/authRouter');
 const profileRouter = require('./routers/profileRouter');
+const messageRouter = require('./routers/chatRoutes')
 const requestRouter = require('./routers/requestRouter');
 const userRouter = require('./routers/user');
 
 const initSocket = require('./sockets'); // ✅ IMPORTANT
+const chatRouter = require('./routers/chatRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -30,6 +32,8 @@ app.use('/', authRouter);
 app.use('/', profileRouter);
 app.use('/', requestRouter);
 app.use('/', userRouter);
+app.use("/", chatRouter);
+
 
 // ✅ initialize socket
 initSocket(io);
