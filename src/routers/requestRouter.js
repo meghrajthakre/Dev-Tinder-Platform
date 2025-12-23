@@ -104,7 +104,7 @@ requestRouter.patch('/request/review/:status/:requestId', userAuth, async (req, 
             toUserId: loggedInUser._id,
             status: 'interested'
         });
-        console.log(request)
+        
         // If no such request exists -> send error
         if (!request) {
             return res.status(404).json({

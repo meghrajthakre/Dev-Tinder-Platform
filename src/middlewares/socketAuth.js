@@ -22,7 +22,6 @@ const socketAuth = async (socket, next) => {
 
     // 4️⃣ Attach user to socket object
     socket.user = user;
-
     // 5️⃣ Allow socket connection
     next();
 

@@ -8,6 +8,8 @@ const userAuth = require("../middlewares/auth"); // JWT middleware
 chatRouter.post("/chat/access/:userId", userAuth, async (req, res) => {
   const { userId } = req.params;
   const myId = req.user._id;
+  console.log(userId);
+  console.log(myId);
   
   try {
     if (myId.toString() === userId) {
