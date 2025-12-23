@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const connectDB = require('./config/database');
 const authRouter = require('./routers/authRouter');
 const profileRouter = require('./routers/profileRouter');
-const messageRouter = require('./routers/chatRoutes')
+const messageRouter = require('./routers/messageRoutes');
 const requestRouter = require('./routers/requestRouter');
 const userRouter = require('./routers/user');
 
@@ -33,6 +33,7 @@ app.use('/', profileRouter);
 app.use('/', requestRouter);
 app.use('/', userRouter);
 app.use("/", chatRouter);
+app.use("/", messageRouter);
 
 
 // ✅ initialize socket
