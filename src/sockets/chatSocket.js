@@ -19,9 +19,7 @@ module.exports = (io, socket) => {
       }
 
       socket.join(chatId);
-      console.log(
-        `🟢 ${socket.user._id.toString()} joined chat ${chatId}`
-      );
+      
     } catch (err) {
       console.error("Join chat error:", err);
     }
@@ -31,7 +29,7 @@ module.exports = (io, socket) => {
 
   /* 🔹 Send message */
   socket.on("send-message", async ({ chatId, content }) => {
-    console.log('Send message event:', { chatId, content });
+    console.log("Send message event:", { chatId, content });
     try {
       if (!chatId || !content?.trim()) return;
 

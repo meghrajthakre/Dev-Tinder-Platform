@@ -11,7 +11,6 @@ const messageRouter = express.Router();
  * Fetch all messages of a chat (only if user is part of that chat)
  */
 messageRouter.get("/message/:chatId", userAuth, async (req, res) => {
-  console.log('chat router is acces')
   try {
     const { chatId } = req.params;
     const userId = req.user._id;
