@@ -4,7 +4,7 @@ const Chat = require("../models/chatModel");
 module.exports = (io, socket) => {
   /* 🔹 Join chat room */
   socket.on("join-chat", async (chatId) => {
-    console.log("Join chat event for chatId:", chatId);
+
     try {
       if (!chatId) return;
 
@@ -19,17 +19,17 @@ module.exports = (io, socket) => {
       }
 
       socket.join(chatId);
-      
+
     } catch (err) {
       console.error("Join chat error:", err);
     }
   });
 
- 
+
 
   /* 🔹 Send message */
   socket.on("send-message", async ({ chatId, content }) => {
-    console.log("Send message event:", { chatId, content });
+
     try {
       if (!chatId || !content?.trim()) return;
 
