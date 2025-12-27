@@ -25,8 +25,6 @@ module.exports = (io, socket) => {
     }
   });
 
-
-
   /* 🔹 Send message */
   socket.on("send-message", async ({ chatId, content }) => {
 

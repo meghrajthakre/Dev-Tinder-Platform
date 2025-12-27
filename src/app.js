@@ -11,7 +11,7 @@ const messageRouter = require('./routers/messageRoutes');
 const requestRouter = require('./routers/requestRouter');
 const userRouter = require('./routers/user');
 
-const initSocket = require('./sockets'); // ✅ IMPORTANT
+const initSocket = require('./sockets'); 
 const chatRouter = require('./routers/chatRoutes');
 
 const app = express();
