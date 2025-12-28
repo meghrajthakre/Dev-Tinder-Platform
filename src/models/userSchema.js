@@ -62,7 +62,7 @@ const userSchema = new Schema({
         max: 120
     },
     photourl: {
-        type: String,
+        type: [String],
         default: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTabOgeMNrSqYJ4c2-kMg0I_QreIqbVVfgvWQ&s',
         validate(value) {
             if (!validate.isURL(value)) {
