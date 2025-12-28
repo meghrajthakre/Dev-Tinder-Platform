@@ -63,7 +63,7 @@ const userSchema = new Schema({
     },
     photourl: {
         type: String,
-        default: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fsearch%3Fk%3Ddummy&psig=AOvVaw2TYyHn6TsJwJf16E2fAQ34&ust=1764062698214000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCODV_uW7ipEDFQAAAAAdAAAAABAE',
+        default: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTabOgeMNrSqYJ4c2-kMg0I_QreIqbVVfgvWQ&s',
         validate(value) {
             if (!validate.isURL(value)) {
                 throw new Error("Invalid URL for photo");
