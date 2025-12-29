@@ -41,7 +41,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
       (key) => (user[key] = req.body[key])
     );
 
-    await user.save();
+    await user.save();  
 
     res.status(200).json({
       success: true,
