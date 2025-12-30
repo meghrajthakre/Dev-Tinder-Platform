@@ -6,6 +6,8 @@ module.exports = (io) => {
 
   io.on("connection", (socket) => {
     console.log("🟢 Socket connected:", socket.user._id.toString());
+    socket.join(socket.user._id.toString());
+    
 
     chatSocket(io, socket);
 

@@ -55,6 +55,16 @@ module.exports = (io, socket) => {
       });
 
       io.to(chatId).emit("receive-message", message);
+      // 🔔 Notify other users (NOT sender)
+      chat.users.forEach((user) => {
+        if (String(user._id) !== String(socket.user._id)) {
+          io.to(user._id.toString()).emit("new-message-notification", {
+            chatId,
+            message,
+          });
+        }
+      });
+
     } catch (err) {
       console.error("Send message error:", err);
     }
