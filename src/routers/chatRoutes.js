@@ -23,7 +23,7 @@ chatRouter.post("/chat/access/:userId", userAuth, async (req, res) => {
     let chat = await Chat.findOne({
       users: { $all: [myId, userId] },
     })
-      .populate("users", "firstName lastName photourl email")
+      .populate("users", "firstName lastName photourl email isOnline lastSeen")
       .populate("latestMessage");
 
     if (!chat) {
