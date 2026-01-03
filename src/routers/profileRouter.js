@@ -91,4 +91,17 @@ profileRouter.patch("/profile/forgotPassword", userAuth, async (req, res) => {
 
 })
 
+profileRouter.get('/profile/:id', userAuth, async (req, res) => {
+  try{
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(500).send(`ERROR fetching user: ${error.message}`);
+  } 
+}
+);
 module.exports = profileRouter;
