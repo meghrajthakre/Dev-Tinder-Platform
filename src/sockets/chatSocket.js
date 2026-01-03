@@ -2,7 +2,6 @@ const Message = require("../models/messageModel");
 const Chat = require("../models/chatModel");
 
 module.exports = (io, socket) => {
-  /* 🔹 Join chat room */
   socket.on("join-chat", async (chatId) => {
 
     try {
