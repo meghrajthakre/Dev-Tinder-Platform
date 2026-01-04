@@ -5,6 +5,9 @@ const User = require('../models/userSchema');
 const { validUserUpdates } = require('../utils/validation');
 const isPassValid = require('../models/userSchema');
 const bcrypt = require('bcrypt');
+const ConnectionRequest = require("../models/connectionRequest");
+const Chat = require("../models/chatModel");
+
 
 profileRouter.get('/profile', userAuth, async (req, res) => {
   try {
@@ -41,7 +44,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
       (key) => (user[key] = req.body[key])
     );
 
-    await user.save();  
+    await user.save();
 
     res.status(200).json({
       success: true,
@@ -92,7 +95,7 @@ profileRouter.patch("/profile/forgotPassword", userAuth, async (req, res) => {
 })
 
 profileRouter.get('/profile/:id', userAuth, async (req, res) => {
-  try{
+  try {
     const userId = req.params.id;
     const user = await User.findById(userId);
     if (!user) {
@@ -101,7 +104,51 @@ profileRouter.get('/profile/:id', userAuth, async (req, res) => {
     res.status(200).json({ success: true, user });
   } catch (error) {
     res.status(500).send(`ERROR fetching user: ${error.message}`);
-  } 
+  }
 }
 );
+
+profileRouter.delete(
+  "/connection/remove/:id",
+  userAuth,
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+      const userIdToRemove = req.params.id;
+
+      const connection = await ConnectionRequest.findOne({
+        $or: [
+          { fromUserId: userId, toUserId: userIdToRemove },
+          { fromUserId: userIdToRemove, toUserId: userId },
+        ],
+      });
+
+      if (!connection) {
+        return res.status(404).json({
+          success: false,
+          message: "Connection does not exist",
+        });
+      }
+
+      await ConnectionRequest.deleteOne({ _id: connection._id });
+
+      await Chat.findOneAndDelete({
+        users: { $all: [userId, userIdToRemove] },
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Connection removed successfully",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Error removing connection",
+        error: error.message,
+      });
+    }
+  }
+);
+
+
 module.exports = profileRouter;
