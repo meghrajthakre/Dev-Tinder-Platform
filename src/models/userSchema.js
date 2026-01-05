@@ -3,87 +3,146 @@ const validate = require('validator');
 const { Schema } = mongoose;
 const jsonewebtoken = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const userSchema = new Schema({
-    firstName: {
-        type: String,
-        required: true,
-        maxlength: 50,
-        minlength: 2
-    },
-    lastName: {
-        type: String,
-        required: true,
-        maxlength: 50,
-        minlength: 2
-    },
+const userSchema = new mongoose.Schema(
+    {
+        firstName: {
+            type: String,
+            required: true,
+            minlength: 2,
+            maxlength: 50,
+            trim: true,
+        },
 
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
-        trim: true,
-        validate(value) {
-            if (!validate.isEmail(value)) {
-                throw new Error("Invalid Email Address");
-            }
-        }
-    },
-    password: {
-        type: String,
-        required: true,
-        minlength: 4,
-        maxlength: 100,
-        validate(value) {
-            if (!validate.isStrongPassword(value)) {
-                throw new Error("Enter a strong password");
-            }
-        }
+        lastName: {
+            type: String,
+            required: true,
+            minlength: 2,
+            maxlength: 50,
+            trim: true,
+        },
 
-    },
-    mobile: {
-        type: Number,
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true,
+            validate(value) {
+                if (!validate.isEmail(value)) {
+                    throw new Error("Invalid Email Address");
+                }
+            },
+        },
 
-    },
-    profession: {
-        type: String
-    },
-    about: {
-        type: String
-    },
-    gender: {
-        type: String,
-        enum: ['Male', 'Female', 'Other', 'male', 'female', 'other'],
-        message: 'Gender must be Male, Female, or Other'
-    },
-    age: {
-        type: Number,
-        min: 0,
-        max: 120
-    },
-    photourl: {
-        type: String,
-        default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTabOgeMNrSqYJ4c2-kMg0I_QreIqbVVfgvWQ&s",
-        validate(value) {
-            if (!validate.isURL(value)) {
-                throw new Error("Invalid URL for photo");
-            }
-        }
-    },
-    skills: {
-        type: [String],
-        default: []
-    },
-    isOnline: {
-        type: Boolean,
-        default: false
-    },
-    lastSeen: {
-        type: Date,
-        default: Date.now
-    }
+        password: {
+            type: String,
+            required: true,
+            minlength: 4,
+            maxlength: 100,
+            select: false, // 🔐 good security practice
+            validate(value) {
+                if (!validate.isStrongPassword(value)) {
+                    throw new Error("Enter a strong password");
+                }
+            },
+        },
 
-}, { timestamps: true });
+        mobile: {
+            type: Number,
+        },
+
+        profession: {
+            type: String,
+            trim: true,
+        },
+
+        experienceLevel: {
+            type: String,
+            enum: ["Student", "Fresher", "Junior", "Mid", "Senior"],
+        },
+
+        about: {
+            type: String,
+            maxlength: 500,
+            trim: true,
+        },
+
+        gender: {
+            type: String,
+            enum: ["Male", "Female", "Other"],
+        },
+
+        age: {
+            type: Number,
+            min: 0,
+            max: 120,
+        },
+
+        photourl: {
+            type: String,
+            default:
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTabOgeMNrSqYJ4c2-kMg0I_QreIqbVVfgvWQ&s",
+            validate(value) {
+                if (!validate.isURL(value)) {
+                    throw new Error("Invalid photo URL");
+                }
+            },
+        },
+
+        photos: {
+            type: [String],
+            default: [],
+        },
+
+        skills: {
+            type: [String],
+            default: [],
+        },
+
+        interests: {
+            type: [String],
+            default: [],
+        },
+
+        lookingFor: {
+            type: String,
+            enum: ["Networking", "Dating", "Friendship", "Hiring"],
+            default: "Networking",
+        },
+
+        location: {
+            city: {
+                type: String,
+                trim: true,
+            },
+            country: {
+                type: String,
+                trim: true,
+            },
+        },
+
+        verified: {
+            type: Boolean,
+            default: false,
+        },
+
+        profileCompleted: {
+            type: Boolean,
+            default: false,
+        },
+
+        isOnline: {
+            type: Boolean,
+            default: false,
+        },
+
+        lastSeen: {
+            type: Date,
+            default: Date.now,
+        },
+    },
+    { timestamps: true }
+);
 
 
 userSchema.methods.getJWT = async function () {
