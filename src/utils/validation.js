@@ -1,34 +1,59 @@
-const validator = require('validator');
+const validator = require("validator");
 
-const validate = (req) => {
-    const { firstName, lastName, email, password, gender, age } = req.body;
+/* =====================================================
+   SIGNUP VALIDATION
+   ===================================================== */
+const validateSignup = (body) => {
+  if (!body || Object.keys(body).length === 0) {
+    throw new Error("Request body is missing");
+  }
 
-    if (!validator.isEmail(email)) {
-        throw new Error("Invalid Email Address");
-    }
-    else if (!validator.isStrongPassword(password)) {
-        throw new Error("Enter a strong password");
-    }
+  const { email, password } = body;
+  console.log(email, password);
 
-}
+  if (!email || !validator.isEmail(email)) {
+    throw new Error("Invalid email address");
+  }
 
-const validUserUpdates = (req) => {
-    const allowedUpdates = [
-        "firstName",
-        "lastName",
-        "age",
-        "gender",
-        "about",
-        "skills",
-        "photourl",
-        "photos",
-        "mobile",
-        "profession"
-    ];
+  if (!password || !validator.isStrongPassword(password)) {
+    throw new Error("Password is not strong enough");
+  }
+};
 
-    const isUpdateValid = Object.keys(req.body).every(field => allowedUpdates.includes(field));
+/* =====================================================
+   PROFILE UPDATE VALIDATION
+   ===================================================== */
+const validateProfileUpdates = (data) => {
+  const allowedUpdates = [
+    "firstName",
+    "lastName",
+    "age",
+    "gender",
+    "about",
+    "skills",
+    "interests",
+    "photourl",
+    "photos",
+    "mobile",
+    "profession",
+    "experienceLevel",
+    "lookingFor",
+    "location",
+    "socialLinks",
+  ];
 
-    return isUpdateValid;
-}
+  const updates = Object.keys(data);
 
-module.exports = { validate, validUserUpdates };
+  const isValidOperation = updates.every((field) =>
+    allowedUpdates.includes(field)
+  );
+
+  if (!isValidOperation) {
+    throw new Error("Invalid profile update fields");
+  }
+};
+
+module.exports = {
+  validateSignup,
+  validateProfileUpdates,
+};

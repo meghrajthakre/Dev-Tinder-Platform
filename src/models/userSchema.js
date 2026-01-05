@@ -1,206 +1,119 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-
+const mongoose = require('mongoose');
+const validate = require('validator');
 const { Schema } = mongoose;
-
-/**
- * USER SCHEMA
- */
-const userSchema = new Schema(
-  {
-    /* ================= BASIC INFO ================= */
+const jsonewebtoken = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const userSchema = new Schema({
     firstName: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 2,
-      maxlength: 50,
+        type: String,
+        required: true,
+        maxlength: 50,
+        minlength: 2
     },
-
     lastName: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 2,
-      maxlength: 50,
+        type: String,
+        required: true,
+        maxlength: 50,
+        minlength: 2
     },
 
     email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-      validate(value) {
-        if (!validator.isEmail(value)) {
-          throw new Error("Invalid email address");
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+        validate(value) {
+            if (!validate.isEmail(value)) {
+                throw new Error("Invalid Email Address");
+            }
         }
-      },
     },
-
     password: {
-      type: String,
-      required: true,
-      minlength: 8,
-      select: false, // 🔐 never send password in queries
-      validate(value) {
-        if (!validator.isStrongPassword(value)) {
-          throw new Error("Password must be strong");
+        type: String,
+        required: true,
+        minlength: 4,
+        maxlength: 100,
+        validate(value) {
+            if (!validate.isStrongPassword(value)) {
+                throw new Error("Enter a strong password");
+            }
         }
-      },
-    },
 
-    /* ================= PROFILE INFO ================= */
-    age: {
-      type: Number,
-      min: 18,
-      max: 100,
-      required: true,
     },
+    mobile: {
+        type: Number,
 
-    gender: {
-      type: String,
-      enum: ["Male", "Female", "Other"],
-      required: true,
     },
-
-    about: {
-      type: String,
-      maxlength: 300,
-    },
-
     profession: {
-      type: String,
-      trim: true,
+        type: String
     },
-
-    experienceLevel: {
-      type: String,
-      enum: ["Student", "Fresher", "Junior", "Mid", "Senior"],
+    about: {
+        type: String
     },
-
-    /* ================= MEDIA ================= */
+    gender: {
+        type: String,
+        enum: ['Male', 'Female', 'Other', 'male', 'female', 'other'],
+        message: 'Gender must be Male, Female, or Other'
+    },
+    age: {
+        type: Number,
+        min: 0,
+        max: 120
+    },
     photourl: {
-      type: String,
-      default:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTabOgeMNrSqYJ4c2-kMg0I_QreIqbVVfgvWQ&s",
-      validate(value) {
-        if (!validator.isURL(value)) {
-          throw new Error("Invalid photo URL");
+        type: String,
+        default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTabOgeMNrSqYJ4c2-kMg0I_QreIqbVVfgvWQ&s",
+        validate(value) {
+            if (!validate.isURL(value)) {
+                throw new Error("Invalid URL for photo");
+            }
         }
-      },
     },
-
-    photos: {
-      type: [String], // multiple images (Tinder-style)
-      default: [],
-    },
-
-    /* ================= INTERESTS & SKILLS ================= */
     skills: {
-      type: [String],
-      default: [],
+        type: [String],
+        default: []
     },
-
-    interests: {
-      type: [String],
-      default: [],
-    },
-
-    lookingFor: {
-      type: String,
-      enum: ["Dating", "Friendship", "Networking", "Hiring"],
-      default: "Networking",
-    },
-
-    /* ================= LOCATION ================= */
-    location: {
-      city: String,
-      country: String,
-    },
-
-    distance: {
-      type: Number, // km (calculated server/frontend)
-    },
-
-    /* ================= STATUS ================= */
-    verified: {
-      type: Boolean,
-      default: false,
-    },
-
     isOnline: {
-      type: Boolean,
-      default: false,
+        type: Boolean,
+        default: false
     },
-
     lastSeen: {
-      type: Date,
-      default: Date.now,
-    },
+        type: Date,
+        default: Date.now
+    }
 
-    profileCompleted: {
-      type: Boolean,
-      default: false,
-    },
+}, { timestamps: true });
 
-    /* ================= SOCIAL LINKS ================= */
-    socialLinks: {
-      github: {
-        type: String,
-        validate: v => !v || validator.isURL(v),
-      },
-      linkedin: {
-        type: String,
-        validate: v => !v || validator.isURL(v),
-      },
-      portfolio: {
-        type: String,
-        validate: v => !v || validator.isURL(v),
-      },
-    },
-  },
-  { timestamps: true }
-);
 
-/* =========================================================
-   🔐 MIDDLEWARES
-   ========================================================= */
+userSchema.methods.getJWT = async function () {
 
-/**
- * Hash password before saving
- */
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
+    // "this" refers to the current user document instance
+    const user = this;
 
-/* =========================================================
-   🔑 INSTANCE METHODS
-   ========================================================= */
+    // Generate a JWT token for the user
+    const jwt = await jsonewebtoken.sign(
+        { id: user._id },     // Payload: store user's unique ID
+        "meghrajsecret",      // Secret key used to sign the token
+        { expiresIn: "1d" }   // Token expiry time: valid for 1 day
+    );
 
-/**
- * Generate JWT
- */
-userSchema.methods.generateJWT = function () {
-  return jwt.sign(
-    { userId: this._id },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
-};
+    // Return the generated JWT
+    return jwt;
+}
 
-/**
- * Compare password
- */
-userSchema.methods.comparePassword = async function (inputPassword) {
-  return bcrypt.compare(inputPassword, this.password);
-};
 
-/* =========================================================
-   📦 EXPORT
-   ========================================================= */
-module.exports = mongoose.model("User", userSchema);
+userSchema.methods.isPassValid = async function (inputPassword) {
+
+    // "this" refers to the current user document
+    const user = this;
+    // Get the hashed password stored in the database
+    const hashPassword = user.password;
+    // Compare the incoming plain password with the hashed password
+    const passValid = await bcrypt.compare(inputPassword, hashPassword);
+    // Return true (valid) or false (invalid)
+    return passValid;
+}
+
+
+module.exports = mongoose.model('User', userSchema);

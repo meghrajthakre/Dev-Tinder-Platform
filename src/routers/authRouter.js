@@ -1,14 +1,15 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const User = require('../models/userSchema');
-const { validate } = require('../utils/validation');
+const { validateSignup } = require('../utils/validation');
 const authRouter = express.Router();
 
 authRouter.post('/signup', async (req, res) => {
   try {
-    validate(req);
+    // validateSignup(req);
 
     const { firstName, lastName, email, password, about, age, photourl, gender, skills } = req.body;
+    console.log(email, password);
     const passwordHash = await bcrypt.hash(password, 10);
 
     const existingUser = await User.findOne({ email });
