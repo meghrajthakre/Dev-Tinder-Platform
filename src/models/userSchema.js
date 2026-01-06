@@ -3,6 +3,7 @@ const validate = require('validator');
 const { Schema } = mongoose;
 const jsonewebtoken = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+
 const userSchema = new mongoose.Schema(
     {
         firstName: {
@@ -39,7 +40,6 @@ const userSchema = new mongoose.Schema(
             required: true,
             minlength: 4,
             maxlength: 100,
-            select: false, // 🔐 good security practice
             validate(value) {
                 if (!validate.isStrongPassword(value)) {
                     throw new Error("Enter a strong password");
