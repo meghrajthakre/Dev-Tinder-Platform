@@ -105,10 +105,8 @@ userRouter.get('/user/feed', userAuth, async (req, res) => {
         const loggedInUser = req.user;
 
         const page = parseInt(req.query.page) || 1;
-        let limit = parseInt(req.query.limit) || 10;
-        limit = limit > 50 ? 50 : limit;
+        
 
-        const skip = (page - 1) * limit;
 
         const connectionsReq = await ConnectionRequest.find({
             $or: [
@@ -129,15 +127,13 @@ userRouter.get('/user/feed', userAuth, async (req, res) => {
         const users = await User.find({
             _id: { $nin: Array.from(hideUserFromFeed) },
         })
-            .select("firstName lastName email age gender photourl")
-            .skip(skip)
-            .limit(limit);
+            .select("firstName lastName email age gender photourl about profession experienceLevel photos location verified skills interests lookingFor")
+          
 
         res.status(200).json({
             success: true,
             message: "Feed fetched successfully",
             currentPage: page,
-            limit,
             data: users
         });
 
