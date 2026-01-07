@@ -2,8 +2,6 @@ const express = require('express');
 const profileRouter = express.Router();
 const userAuth = require('../middlewares/auth');
 const User = require('../models/userSchema');
-const { validUserUpdates } = require('../utils/validation');
-const isPassValid = require('../models/userSchema');
 const bcrypt = require('bcrypt');
 const ConnectionRequest = require("../models/connectionRequest");
 const Chat = require("../models/chatModel");
@@ -35,15 +33,17 @@ profileRouter.get('/feed', userAuth, async (req, res) => {
 // Update user by ID
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
-    if (!validUserUpdates(req)) {
-      return res.status(400).json({ success: false, message: "Invalid fields" });
-    }
-
     const user = req.user;
-    Object.keys(req.body).forEach(
-      (key) => (user[key] = req.body[key])
-    );
-
+    Object.keys(req.body).forEach((key) => {
+      if (key === "gender" && req.body.gender) {
+        // Normalize gender
+        user.gender =
+          req.body.gender.charAt(0).toUpperCase() +
+          req.body.gender.slice(1).toLowerCase();
+      } else {
+        user[key] = req.body[key];
+      }
+    });
     await user.save();
 
     res.status(200).json({
