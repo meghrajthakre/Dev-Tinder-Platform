@@ -49,8 +49,9 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
     const user = req.user;
     Object.keys(req.body).forEach((key) => {
-      if (key === "gender" && req.body.gender) {
-        // Normalize gender
+      if (key === "photos" && Array.isArray(req.body.photos)) {
+        user.photos = req.body.photos.filter(Boolean); // ✅ flatten + clean
+      } else if (key === "gender" && req.body.gender) {
         user.gender =
           req.body.gender.charAt(0).toUpperCase() +
           req.body.gender.slice(1).toLowerCase();
@@ -179,7 +180,7 @@ profileRouter.post(
 
       res.status(200).json({
         success: true,
-        photos: [urls],
+        photos: urls,
       });
 
     } catch (err) {
