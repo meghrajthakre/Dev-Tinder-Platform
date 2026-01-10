@@ -140,6 +140,90 @@ const userSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        // 🔹 Developer specific profile data
+
+        githubUsername: {
+            type: String,
+            trim: true,
+        },
+
+        githubProfileUrl: {
+            type: String,
+            trim: true,
+            validate(value) {
+                if (value && !validate.isURL(value)) {
+                    throw new Error("Invalid GitHub URL");
+                }
+            },
+        },
+
+        linkedinProfileUrl: {
+            type: String,
+            trim: true,
+            validate(value) {
+                if (value && !validate.isURL(value)) {
+                    throw new Error("Invalid LinkedIn URL");
+                }
+            },
+        },
+
+        portfolioUrl: {
+            type: String,
+            trim: true,
+            validate(value) {
+                if (value && !validate.isURL(value)) {
+                    throw new Error("Invalid Portfolio URL");
+                }
+            },
+        },
+
+        currentRole: {
+            type: String,
+            trim: true, // Frontend Dev, Backend Dev, Full Stack etc
+        },
+
+        preferredTechStack: {
+            type: [String], // React, Node, MongoDB
+            default: [],
+        },
+
+        openToWork: {
+            type: Boolean,
+            default: false,
+        },
+
+        lookingForRoles: {
+            type: [String], // Intern, Full-time, Freelance
+            default: [],
+        },
+
+        availability: {
+            type: String,
+            enum: ["Full-time", "Part-time", "Freelance", "Open Source"],
+        },
+
+        githubStats: {
+            repos: Number,
+            followers: Number,
+            following: Number,
+        },
+
+        matchPreferences: {
+            skills: {
+                type: [String],
+                default: [],
+            },
+            experienceLevel: {
+                type: [String],
+                default: [],
+            },
+            locationPreference: {
+                type: String,
+                enum: ["Remote", "Same City", "Anywhere"],
+                default: "Anywhere",
+            },
+        },
+
     },
     { timestamps: true }
 );
