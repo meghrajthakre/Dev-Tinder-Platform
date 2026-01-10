@@ -5,7 +5,21 @@ const User = require('../models/userSchema');
 const bcrypt = require('bcrypt');
 const ConnectionRequest = require("../models/connectionRequest");
 const Chat = require("../models/chatModel");
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary"); // your cloudinary config
 
+// Multer storage for Cloudinary
+const upload = multer({
+  storage: new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: "user_photos",
+      allowed_formats: ["jpg", "png", "jpeg"],
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+});
 
 profileRouter.get('/profile', userAuth, async (req, res) => {
   try {
@@ -145,6 +159,33 @@ profileRouter.delete(
         success: false,
         message: "Error removing connection",
         error: error.message,
+      });
+    }
+  }
+);
+
+// Upload photos to Cloudinary
+profileRouter.post(
+  "/profile/uploadPhotos",
+  userAuth,
+  upload.array("photos", 10),
+  async (req, res) => {
+    try {
+      const urls = req.files.map(file => file.path);
+
+      // Save in user profile
+      req.user.photos.push(...urls);
+      await req.user.save();
+
+      res.status(200).json({
+        success: true,
+        photos: [urls],
+      });
+
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message: err.message,
       });
     }
   }
