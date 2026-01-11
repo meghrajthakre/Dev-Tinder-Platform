@@ -48,23 +48,16 @@ profileRouter.get('/feed', userAuth, async (req, res) => {
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
     const user = req.user;
-    Object.keys(req.body).forEach((key) => {
-      if (key === "photos" && Array.isArray(req.body.photos)) {
-        user.photos = req.body.photos.filter(Boolean); // ✅ flatten + clean
-      } else if (key === "gender" && req.body.gender) {
-        user.gender =
-          req.body.gender.charAt(0).toUpperCase() +
-          req.body.gender.slice(1).toLowerCase();
-      } else {
-        user[key] = req.body[key];
-      }
-    });
-    await user.save();
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      req.body,
+      { new: true, runValidators: true }
+    );
 
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      user,
+      user: updatedUser,
     });
 
   } catch (err) {
@@ -183,6 +176,30 @@ profileRouter.post(
         photos: urls,
       });
 
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message: err.message,
+      });
+    }
+  }
+);
+
+profileRouter.post(
+  "/profile/profilePicture",
+  userAuth,
+  upload.single("photo"),
+  async (req, res) => {
+    try {
+      const photoUrl = req.file.path;
+
+      req.user.photourl = photoUrl;   // ✅ correct field
+      await req.user.save();
+
+      res.status(200).json({
+        success: true,
+        photourl: photoUrl,   // ✅ send back to frontend
+      });
     } catch (err) {
       res.status(500).json({
         success: false,
