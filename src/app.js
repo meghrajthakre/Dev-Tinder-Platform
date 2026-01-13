@@ -26,16 +26,16 @@ const io = new Server(server, {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 
-
-app.use('/', authRouter);
-app.use('/', profileRouter);
-app.use('/', requestRouter);
-app.use('/', userRouter);
-app.use("/", chatRouter);
-app.use("/", messageRouter);
+// ✅ setup routes
+app.use('/api', authRouter);
+app.use('/api', profileRouter);
+app.use('/api', requestRouter);
+app.use('/api', userRouter);
+app.use('/api', chatRouter);
+app.use('/api', messageRouter);
 
 
 // ✅ initialize socket
