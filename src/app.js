@@ -41,7 +41,7 @@ app.use('/api', messageRouter);
 // ✅ initialize socket
 initSocket(io);
 
-const port = 3001;
+const port = process.env.PORT ;
 
 connectDB()
   .then(() => {
