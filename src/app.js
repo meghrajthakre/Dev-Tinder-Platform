@@ -46,7 +46,7 @@ const port = process.env.PORT ;
 connectDB()
   .then(() => {
     server.listen(port, () => {
-      console.log(`✅ Server running on port ${port}`);
+      console.log(` Server running on port ${port}`);
     });
   })
   .catch((err) => {

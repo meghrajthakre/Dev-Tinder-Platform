@@ -3,7 +3,7 @@ const Chat = require("../models/chatModel");
 
 module.exports = (io, socket) => {
   socket.on("join-chat", async (chatId) => {
-
+    console.log("👉 join-chat:", chatId, socket.user._id.toString());
     try {
       if (!chatId) return;
 
@@ -18,6 +18,7 @@ module.exports = (io, socket) => {
       }
 
       socket.join(chatId);
+      console.log("✅ Joined room:", chatId);
 
     } catch (err) {
       console.error("Join chat error:", err);

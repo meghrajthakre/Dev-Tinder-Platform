@@ -6,6 +6,7 @@ module.exports = (io) => {
 
   io.on("connection", async (socket) => {
     const userId = socket.user._id;
+    console.log("SOCKET USER:", socket.user);
 
     // Mark online
     await User.findByIdAndUpdate(userId, { isOnline: true });
