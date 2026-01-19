@@ -94,7 +94,7 @@ contactRouter.post("/contact", async (req, res) => {
         const mailOptionsToUser = {
             from: process.env.EMAIL_USER,
             to: sanitizedEmail,
-            subject: "Thank you for contacting DevStinder",
+            subject: "Thank you for contacting DevsTinder",
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
                     <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
