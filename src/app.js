@@ -13,6 +13,8 @@ const userRouter = require('./routers/user');
 
 const initSocket = require('./sockets');
 const chatRouter = require('./routers/chatRoutes');
+const paymentRouter = require("./routers/paymentRouter");
+const contactRouter = require("./routers/contactRouter");
 
 const app = express();
 const server = http.createServer(app);
@@ -36,6 +38,8 @@ app.use('/api', requestRouter);
 app.use('/api', userRouter);
 app.use('/api', chatRouter);
 app.use('/api', messageRouter);
+app.use('/api', paymentRouter);
+app.use('/api', contactRouter);
 
 
 // ✅ initialize socket
