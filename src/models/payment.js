@@ -32,6 +32,7 @@ const paymentSchema = new mongoose.Schema({
     notes: {
        firstName: String,
        lastName: String,
+       email:String,
        membershipType: String
     }
 
