@@ -5,7 +5,6 @@ const Payment = require('../models/payment');
 const userAuth = require("../middlewares/auth");
 const membershipAmount = require("../utils/constants");
 const { validateWebhookSignature } = require('razorpay/dist/utils/razorpay-utils');
-const Payment = require("../models/payment");
 const User = require("../models/userSchema");
 
 // Define payment-related routes here
@@ -61,7 +60,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
         if (!isValidSign) {
             return res.status(400).json({ message: "Webhook signature invalid" });
         }
-        
+
         const event = req.body.event;
         if (event !== "payment.captured") {
             return res.status(200).json({ message: "Event ignored" });
