@@ -10,7 +10,6 @@ const profileRouter = require('./routers/profileRouter');
 const messageRouter = require('./routers/messageRoutes');
 const requestRouter = require('./routers/requestRouter');
 const userRouter = require('./routers/user');
-
 const initSocket = require('./sockets');
 const chatRouter = require('./routers/chatRoutes');
 const paymentRouter = require("./routers/paymentRouter");
@@ -26,40 +25,35 @@ const io = new Server(server, {
   }
 });
 
+// Apply raw body parser only for webhook route
+app.use('/api/payment/webhook', express.raw({ type: "application/json" }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 
-app.post(
-  "/payment/webhook",
-  express.raw({ type: "application/json" }),
-  paymentRouter
-);
-
-// ✅ setup routes
 app.use('/api', authRouter);
 app.use('/api', profileRouter);
 app.use('/api', requestRouter);
 app.use('/api', userRouter);
 app.use('/api', chatRouter);
 app.use('/api', messageRouter);
-// app.use('/api', paymentRouter);
+app.use('/api', paymentRouter); 
 app.use('/api', contactRouter);
 
-
-// ✅ initialize socket
+// ✅ Initialize socket
 initSocket(io);
 
-const port = process.env.PORT ;
+const port = process.env.PORT;
 
 connectDB()
   .then(() => {
     server.listen(port, () => {
-      console.log(` Server running on port ${port}`);
+      console.log(`Server running on port ${port}`);
     });
   })
   .catch((err) => {
-    console.error("❌ Failed to connect to database:", err.message);
-    process.exit(1); // stop app if DB connection fails
+    console.error("Failed to connect to database:", err.message);
+    process.exit(1);
   });
