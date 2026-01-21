@@ -121,6 +121,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
         user.membershipType = payment.notes?.membershipType || "premium";
         user.membershipStartDate = new Date();
         user.membershipValidity = validityDate;
+        user.verified = true ;
 
         await user.save();
 
