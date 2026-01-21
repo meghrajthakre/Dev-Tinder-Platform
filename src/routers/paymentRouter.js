@@ -46,13 +46,10 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
 
 paymentRouter.post('/payment/webhook', async (req, res) => {
     try {
-        console.log("🔔 Webhook received");
 
         const signature = req.get("X-Razorpay-Signature");
-        console.log("Signature received:", !!signature);
 
         if (!signature) {
-            console.log("❌ Signature missing");
             return res.status(400).json({ message: "Signature missing" });
         }
 
@@ -63,41 +60,31 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
             process.env.RAZORPAY_WEBHOOK_SECRET
         );
 
-        console.log("Signature valid:", isValidSign);
 
         if (!isValidSign) {
-            console.log("❌ Invalid webhook signature");
             return res.status(400).json({ message: "Invalid webhook signature" });
         }
 
         // Parse RAW body AFTER validation
         const payload = JSON.parse(req.body.toString());
-        console.log("Webhook event:", payload.event);
 
         // Only process payment.captured
         if (payload.event !== "payment.captured") {
-            console.log("ℹ️ Event ignored:", payload.event);
             return res.status(200).json({ message: "Event ignored" });
         }
 
         const paymentDetails = payload.payload.payment.entity;
-
-        console.log("Order ID:", paymentDetails.order_id);
-        console.log("Payment ID:", paymentDetails.id);
-        console.log("Payment Status:", paymentDetails.status);
 
         const payment = await Payment.findOne({
             orderId: paymentDetails.order_id,
         });
 
         if (!payment) {
-            console.log("❌ Payment record not found");
             return res.status(404).json({ message: "Payment not found" });
         }
 
         // Idempotency check
         if (payment.status === "captured") {
-            console.log("ℹ️ Payment already processed");
             return res.status(200).json({ message: "Already processed" });
         }
 
@@ -105,12 +92,11 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
         payment.razorpayPaymentId = paymentDetails.id;
         await payment.save();
 
-        console.log("✅ Payment marked as captured");
 
         const user = await User.findById(payment.userId);
 
         if (!user) {
-            console.log("❌ User not found");
+            console.log("User not found");
             return res.status(404).json({ message: "User not found" });
         }
 
@@ -122,16 +108,71 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
         user.membershipStartDate = new Date();
         user.membershipValidity = validityDate;
         user.verified = true ;
-
         await user.save();
-
-        console.log("✅ User upgraded to premium:", user._id);
 
         return res.status(200).json({ message: "Webhook processed successfully" });
 
     } catch (error) {
         console.log("❌ Webhook processing error:", error.message);
         return res.status(500).json({ message: "Webhook failed" });
+    }
+});
+
+paymentRouter.post('/payment/verify', userAuth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ 
+                message: "User not found",
+                isPremium: false 
+            });
+        }
+
+        // Check if user has premium membership
+        if (!user.isPremium) {
+            return res.status(200).json({ 
+                message: "No active premium membership",
+                isPremium: false 
+            });
+        }
+
+        // Check if membership is still valid
+        const currentDate = new Date();
+        const validityDate = new Date(user.membershipValidity);
+
+        if (currentDate > validityDate) {
+            // Membership expired - revoke access
+            user.isPremium = false;
+            await user.save();
+
+            return res.status(200).json({ 
+                message: "Premium membership has expired",
+                isPremium: false,
+                expiredOn: validityDate
+            });
+        }
+
+        // Calculate days remaining
+        const daysRemaining = Math.ceil((validityDate - currentDate) / (1000 * 60 * 60 * 24));
+
+        // Membership is valid
+        return res.status(200).json({ 
+            message: "Premium membership is active",
+            isPremium: true,
+            membershipType: user.membershipType,
+            startDate: user.membershipStartDate,
+            validUntil: user.membershipValidity,
+            daysRemaining: daysRemaining,
+            expiringSoon: daysRemaining <= 7 // Warn if expiring within 7 days
+        });
+
+    } catch (error) {
+        console.error('Payment verification error:', error);
+        return res.status(500).json({ 
+            error: "Failed to verify payment status",
+            isPremium: false 
+        });
     }
 });
 
