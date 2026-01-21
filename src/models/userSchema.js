@@ -69,13 +69,27 @@ const userSchema = new mongoose.Schema(
 
         gender: {
             type: String,
-            
+
         },
 
         age: {
             type: Number,
             min: 0,
             max: 120,
+        },
+        isPremium: {
+            type: Boolean,
+            default: false
+        },
+        membershipType: {
+            type: string,
+             default: 'annual'
+        },
+        membershipValidity: {
+            type: Date
+        },
+        membershipStartDate: {
+            type: Date,
         },
 
         photourl: {

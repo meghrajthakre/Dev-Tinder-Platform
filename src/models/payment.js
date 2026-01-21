@@ -15,25 +15,26 @@ const paymentSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        required:true
+        required: true
     },
     amount: {
         type: Number,
         required: true
     },
     currency: {
-        type: String,   
-        required: true
-    },
-    receipt: { 
         type: String,
         required: true
     },
+    receipt: {
+        type: String,
+        required: true
+    },
+    
     notes: {
-       firstName: String,
-       lastName: String,
-       email:String,
-       membershipType: String
+        firstName: String,
+        lastName: String,
+        email: String,
+        membershipType: String
     }
 
 })
