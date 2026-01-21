@@ -58,7 +58,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 
         // ✅ Signature verification (RAW body)
         const isValidSign = validateWebhookSignature(
-            req.body,
+            JSON.stringify(req.body),
             signature,
             process.env.RAZORPAY_WEBHOOK_SECRET
         );
