@@ -82,8 +82,7 @@ const userSchema = new mongoose.Schema(
             default: false
         },
         membershipType: {
-            type: string,
-             default: 'annual'
+            type: String,   
         },
         membershipValidity: {
             type: Date
