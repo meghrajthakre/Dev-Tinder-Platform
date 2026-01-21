@@ -31,6 +31,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 
+app.post(
+  "/payment/webhook",
+  express.raw({ type: "application/json" }),
+  paymentRouter
+);
+
 // ✅ setup routes
 app.use('/api', authRouter);
 app.use('/api', profileRouter);
@@ -38,7 +44,7 @@ app.use('/api', requestRouter);
 app.use('/api', userRouter);
 app.use('/api', chatRouter);
 app.use('/api', messageRouter);
-app.use('/api', paymentRouter);
+// app.use('/api', paymentRouter);
 app.use('/api', contactRouter);
 
 
