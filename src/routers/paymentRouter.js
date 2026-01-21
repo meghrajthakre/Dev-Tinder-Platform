@@ -118,7 +118,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
     }
 });
 
-paymentRouter.post('/payment/verify', userAuth, async (req, res) => {
+paymentRouter.get('/payment/verify', userAuth, async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
 
