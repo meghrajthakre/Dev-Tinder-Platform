@@ -56,6 +56,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
             process.env.RAZORPAY_WEBHOOK_SECRET
         );
 
+        console.log("is valid sign" , isValidSign)
         // Reject invalid signatures to prevent unauthorized access
         if (!isValidSign) {
             return res.status(400).json({ message: "Webhook signature invalid" });
